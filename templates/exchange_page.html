@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block navbar %}
+<nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Exchange Simulator</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mynavbar">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link active" href="#">Биржа</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+{% endblock %}
+
+{% block header %}{{ header }}{% endblock %}
+
+{% block content %}
+<form>
+  <label for="phone_number">Введите ваш номер телефона:</label><br>
+  <input type="number" id="phone_number" required>
+  <button type="button" onclick="connectToExchange()">Подключиться</button>
+</form>
+<div id="chatbox" style="border: 1px solid #ccc; width: 300px; height: 200px; overflow-y: scroll;"></div>
+
+<table id="orders_table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Creation time</th>
+            <th>Change time</th>
+            <th>Status</th>
+            <th>Side</th>
+            <th>Price</th>
+            <th>Amount</th>
+            <th>Instrument</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for order in orders %}
+        <tr>
+            <td>{{ order[0] }}</td>
+            <td>{{ order[1] }}</td>
+            <td>{{ order[2] }}</td>
+            <td>{{ order[3] }}</td>
+            <td>{{ order[4] }}</td>
+            <td>{{ order[5] }}</td>
+            <td>{{ order[6] }}</td>
+            <td>{{ order[7] }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<form>
+  <label for="message"></label><br>
+  <input type="text" id="message" required>
+  <button type="button" onclick="sendMessage()">Отправить</button>
+</form>
+
+<script>
+  let socket;
+  let phone_number;
+  const chatbox = document.getElementById("chatbox");
+
+  function connectToExchange() {
+    phone_number = document.getElementById("phone_number").value;
+    if (phone_number) {
+      socket = new WebSocket(`ws://localhost:8000/ws/${phone_number}`);
+      socket.onmessage = function(event) {
+        chatbox.innerHTML += event.data + "<br>";
+        chatbox.scrollTop = chatbox.scrollHeight;
+      };
+    }
+  }
+
+  function sendMessage() {
+    const message = document.getElementById("message").value;
+    if (socket && message) {
+      socket.send(message);
+      document.getElementById("message").value = "";
+    }
+  }
+</script>
+
+{% endblock %}

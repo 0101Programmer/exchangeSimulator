@@ -31,5 +31,18 @@ def create_order():
             curs.execute(query, (creation_time, change_time, status, side, price, amount, instrument))
             conn.commit()
 
+def get_all_orders():
+    with get_connection() as conn:
+        with conn.cursor() as curs:
+            curs.execute('SELECT * FROM orders')
+            orders = curs.fetchall()
+            return orders
+
+
 if __name__ == '__main__':
-    create_order()
+    # создать 10 заявок на бирже
+    # for i in range(10):
+    #     create_order()
+
+    # получить все заявки из таблицы
+    print(get_all_orders())
