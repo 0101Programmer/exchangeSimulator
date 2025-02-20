@@ -22,6 +22,11 @@ order_queue = []
 @app.websocket("/ws/{phone_number}")
 async def websocket_endpoint(websocket: WebSocket, phone_number: int):
     await websocket.accept()
+    print(phone_number)
+    await websocket.send_text("test")
+
+
+    '''
     # Добавляем клиента в список подключенных
     connected_clients.append({"websocket": websocket, "phone_number": phone_number})
     # Приветственное сообщение для нового клиента
@@ -44,6 +49,8 @@ async def websocket_endpoint(websocket: WebSocket, phone_number: int):
     except WebSocketDisconnect:
         # Удаляем клиента из списка при отключении
         connected_clients.remove({"websocket": websocket, "phone_number": phone_number})
+        '''
+
 
 
 # Веб-страница для входа по номеру телефона

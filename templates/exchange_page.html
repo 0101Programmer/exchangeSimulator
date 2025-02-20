@@ -23,13 +23,12 @@
 {% block header %}{{ header }}{% endblock %}
 
 {% block content %}
-<form>
+<form id="connection-form">
   <label for="phone_number">Введите ваш номер телефона:</label><br>
   <input type="number" id="phone_number" required>
   <button type="button" onclick="connectToExchange()">Подключиться</button>
 </form>
-<div id="chatbox" style="border: 1px solid #ccc; width: 300px; height: 200px; overflow-y: scroll;"></div>
-
+<br>
 <table id="orders_table">
     <thead>
         <tr>
@@ -46,48 +45,54 @@
     <tbody>
     {% for order in orders %}
         <tr>
-            <td>{{ order[0] }}</td>
-            <td>{{ order[1] }}</td>
-            <td>{{ order[2] }}</td>
-            <td>{{ order[3] }}</td>
-            <td>{{ order[4] }}</td>
-            <td>{{ order[5] }}</td>
-            <td>{{ order[6] }}</td>
-            <td>{{ order[7] }}</td>
+            <td>{{ order.id }}</td>
+            <td>{{ order.creation_time }}</td>
+            <td>{{ order.change_time }}</td>
+            <td>{{ order.status }}</td>
+            <td>{{ order.side }}</td>
+            <td>{{ order.price }}</td>
+            <td>{{ order.amount }}</td>
+            <td>{{ order.instrument }}</td>
         </tr>
     {% endfor %}
     </tbody>
 </table>
 
-<form>
-  <label for="message"></label><br>
-  <input type="text" id="message" required>
-  <button type="button" onclick="sendMessage()">Отправить</button>
+<form id="order-widget">
+    <label for="instrument-select"></label>
+    <br>
+    <select name="instruments" id="instrument-select">
+        {% for order in orders %}
+        <option value="{{ order }}">{{ order.instrument }}</option>
+        {% endfor %}
+    </select>
+    <label for="order_value"></label>
+    <input type="number" id="order_value" value="">
 </form>
 
+<p id="test"></p>
+
 <script>
-  let socket;
-  let phone_number;
-  const chatbox = document.getElementById("chatbox");
-
-  function connectToExchange() {
-    phone_number = document.getElementById("phone_number").value;
-    if (phone_number) {
-      socket = new WebSocket(`ws://localhost:8000/ws/${phone_number}`);
-      socket.onmessage = function(event) {
-        chatbox.innerHTML += event.data + "<br>";
-        chatbox.scrollTop = chatbox.scrollHeight;
-      };
+    document.getElementById('order-widget').classList.add('hidden');
+    let socket;
+    let phone_number;
+    function connectToExchange() {
+        phone_number = document.getElementById("phone_number").value;
+        if (phone_number) {
+            socket = new WebSocket(`ws://localhost:8000/ws/${phone_number}`);
+            socket.onmessage = function(event) {
+                document.getElementById("test").innerHTML = "works";
+                document.getElementById('connection-form').classList.add('hidden');
+                document.getElementById('order-widget').classList.remove('hidden');
+            };
+        }
     }
-  }
-
-  function sendMessage() {
-    const message = document.getElementById("message").value;
-    if (socket && message) {
-      socket.send(message);
-      document.getElementById("message").value = "";
+    document.getElementById("instrument-select").addEventListener("change", printMsg);
+    function printMsg() {
+        alert(document.getElementById("instrument-select").value);
+        document.getElementById("order_value").value='111';
+        console.log((document.getElementById("instrument-select").value.slice(12, -1)));
     }
-  }
 </script>
 
 {% endblock %}

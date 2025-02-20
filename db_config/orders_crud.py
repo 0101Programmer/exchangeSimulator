@@ -1,6 +1,8 @@
 import random
 from datetime import datetime
 
+import psycopg2.extras
+
 from db_config.db_connection import get_connection
 
 status_list = ["Active", "Filled", "Rejected", "Cancelled"]
@@ -33,7 +35,8 @@ def create_order():
 
 def get_all_orders():
     with get_connection() as conn:
-        with conn.cursor() as curs:
+        # запрос всех записей с авто-конвертацией в словарь
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as curs:
             curs.execute('SELECT * FROM orders')
             orders = curs.fetchall()
             return orders
