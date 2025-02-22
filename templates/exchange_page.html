@@ -57,23 +57,34 @@
     {% endfor %}
     </tbody>
 </table>
-
+<br>
 <form id="order-widget">
-    <label for="instrument-select"></label>
-    <br>
-    <select name="instruments" id="instrument-select">
-        {% for order in orders %}
-        <option value="{{ order }}">{{ order.instrument }}</option>
-        {% endfor %}
-    </select>
-    <label for="order_value"></label>
-    <input type="number" id="order_value" value="">
+    <p>
+        <label for="instrument-select"></label>
+        <select name="instruments" id="instrument-select">
+            {% for order in orders %}
+            <option value="{{ order.id }}">{{ order.instrument }}</option>
+            {% endfor %}
+        </select>
+    </p>
+    <p id="order-value-p">
+        <label for="order_value"></label>
+        <input type="number" id="order_value" value="1000">
+    </p>
+    <p id="order-price">
+        &nbsp;<span id="sell_price"></span> <span id="buy_price"></span>
+    </p>
+    <p id="order-action">
+        &nbsp;<button>Sell</button> <button>Buy</button>
+    </p>
 </form>
-
-<p id="test"></p>
 
 <script>
     document.getElementById('order-widget').classList.add('hidden');
+    document.getElementById('order-value-p').classList.add('hidden');
+    document.getElementById('order-price').classList.add('hidden');
+    document.getElementById('order-action').classList.add('hidden');
+
     let socket;
     let phone_number;
     function connectToExchange() {
@@ -81,17 +92,33 @@
         if (phone_number) {
             socket = new WebSocket(`ws://localhost:8000/ws/${phone_number}`);
             socket.onmessage = function(event) {
-                document.getElementById("test").innerHTML = "works";
                 document.getElementById('connection-form').classList.add('hidden');
                 document.getElementById('order-widget').classList.remove('hidden');
             };
         }
     }
     document.getElementById("instrument-select").addEventListener("change", printMsg);
+
     function printMsg() {
-        alert(document.getElementById("instrument-select").value);
-        document.getElementById("order_value").value='111';
-        console.log((document.getElementById("instrument-select").value.slice(12, -1)));
+        const value = document.getElementById('instrument-select').value;
+
+        document.getElementById('order-value-p').classList.remove('hidden');
+        document.getElementById('order-price').classList.remove('hidden');
+        document.getElementById('order-action').classList.remove('hidden');
+
+        $.ajax({
+            url: '/receive_data',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ 'order_id': value }),
+            success: function(response) {
+                    document.getElementById('sell_price').innerHTML = response.sell_side_price;
+                    document.getElementById('buy_price').innerHTML = response.buy_side_price;
+                },
+            error: function(error) {
+                    console.log(error);
+                }
+            });
     }
 </script>
 

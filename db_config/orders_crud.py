@@ -41,6 +41,22 @@ def get_all_orders():
             orders = curs.fetchall()
             return orders
 
+def get_order_by_id(order_id):
+    with get_connection() as conn:
+        # запрос записи по id
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as curs:
+            curs.execute('SELECT * FROM orders WHERE id=%s', (order_id, ))
+            order = curs.fetchone()
+            return order
+
+def get_order_by_side_and_instrument(order_side, order_instrument):
+    with get_connection() as conn:
+        # запрос записи по side и instrument
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as curs:
+            curs.execute('SELECT * FROM orders WHERE side=%s AND instrument=%s', (order_side, order_instrument, ))
+            order = curs.fetchone()
+            return order
+
 
 if __name__ == '__main__':
     # создание заявок в таблице

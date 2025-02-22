@@ -1,10 +1,14 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, Response
+import ast
+
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, Response, Body
+from fastapi.responses import JSONResponse
+
 from typing import List
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
-from db_config.orders_crud import get_all_orders
+from db_config.orders_crud import get_all_orders, get_order_by_id, get_order_by_side_and_instrument
 
 app = FastAPI()
 
@@ -14,9 +18,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # Список подключенных клиентов
 connected_clients = []
 
-# Очередь сообщений
-order_queue = []
-
 
 # WebSocket для веб-интерфейса биржи
 @app.websocket("/ws/{phone_number}")
@@ -24,7 +25,6 @@ async def websocket_endpoint(websocket: WebSocket, phone_number: int):
     await websocket.accept()
     print(phone_number)
     await websocket.send_text("test")
-
 
     '''
     # Добавляем клиента в список подключенных
@@ -60,3 +60,14 @@ async def exchange_interface(request: Request):
     return templates.TemplateResponse("exchange_page.html",
                                       {"request": request, "header": "Симулятор биржи", "title": "Exchange Page",
                                        "orders": orders})
+
+@app.post("/receive_data")
+async def receive_data(request: Request):
+    data = await request.json()
+    result = get_order_by_id(data["order_id"])
+    buy_side = get_order_by_side_and_instrument("Buy", result["instrument"]) if (
+        get_order_by_side_and_instrument("Buy", result["instrument"])) else None
+    sell_side = get_order_by_side_and_instrument("Sell", result["instrument"]) if (
+        get_order_by_side_and_instrument("Sell", result["instrument"])) else None
+
+    return JSONResponse(content={"buy_side_price": buy_side["price"], "sell_side_price": sell_side["price"], "instrument": result["instrument"]})
