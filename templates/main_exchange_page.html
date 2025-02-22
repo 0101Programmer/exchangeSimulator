@@ -52,19 +52,32 @@
     <label for="amount"></label>
     <input name="order-amount" id="amount" type="number" min="1">
   </p>
+  <p>
+    <label></label>
+    <span id="sell-price"></span> <span id="buy-price"></span>
+  </p>
 </form>
 
 <script>
   const ws = new WebSocket("ws://localhost:8000/ws");
+  let tableData = [];  // Сохраняем данные таблицы для дальнейшего использования
+
   ws.onmessage = function(event) {
     const data = JSON.parse(event.data);
+    tableData = data;  // Сохраняем данные в переменную
     const tbody = document.getElementById('tableBody');
     const select = document.getElementById('instrument-select');
     const amount = document.getElementById('amount');
-    // Очищаем таблицу и выпадающий список
+    const sell_price = document.getElementById('sell-price');
+    const buy_price = document.getElementById('buy-price');
+
+    // Очищаем изменяемые элементы
     tbody.innerHTML = '';
     select.innerHTML = '';
     amount.value = 1;
+    sell_price.innerHTML = '';
+    buy_price.innerHTML = '';
+
     // Заполняем таблицу
     data.forEach((row, index)=> {
       const tr = document.createElement('tr');
@@ -79,18 +92,51 @@
         <td>${row.instrument}</td>
       `;
       tbody.appendChild(tr);
+
       // Добавляем инструмент в выпадающий список
       const option = document.createElement('option');
       option.value = row.id;
       option.textContent = row.instrument;
+
       // Устанавливаем первый элемент как выбранный
       if (index === 0) {
         option.selected = true;
+        // Обновляем цены для первого инструмента
+        updatePrices(row.id);
       }
 
       select.appendChild(option);
     });
+
+    // Добавляем обработчик события change для select
+    select.addEventListener('change', function() {
+      // this ссылается на элемент <select>
+      const selectedId = parseInt(this.value);  // Получаем выбранный id
+      updatePrices(selectedId);  // Обновляем цены
+    });
   };
+  // Функция для обновления цен
+  function updatePrices(selectedId) {
+    const sell_price = document.getElementById('sell-price');
+    const buy_price = document.getElementById('buy-price');
+
+    // Находим строку данных по selectedId, чтобы получить название инструмента
+    const selectedRow = tableData.find(row => row.id === selectedId);
+    if (!selectedRow) {
+      // проверка было ли найдено значение по id
+      sell_price.textContent = 'Sell: N/A';
+      buy_price.textContent = 'Buy: N/A';
+    }
+    const instrumentName = selectedRow.instrument;  // Получаем название инструмента
+
+    // находим цены для выбранного инструмента
+    const sellRow = tableData.find(row => row.instrument === instrumentName && row.side === 'Sell');
+    const buyRow = tableData.find(row => row.instrument === instrumentName && row.side === 'Buy');
+
+    // Обновляем элементы <span>
+    sell_price.textContent = sellRow ? `Sell: ${sellRow.price}` : 'Sell: N/A';
+    buy_price.textContent = buyRow ? `Buy: ${buyRow.price}` : 'Buy: N/A';
+}
 </script>
 
 {% endblock %}
