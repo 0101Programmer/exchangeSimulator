@@ -1,0 +1,6 @@
+#order-widget {
+  border: 2px solid black; /* Граница */
+  padding: 10px;          /* Внутренний отступ */
+  border-radius: 5px;     /* Закругленные углы */
+  width: 300px;           /* Ширина формы */
+}

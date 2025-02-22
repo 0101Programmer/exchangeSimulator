@@ -124,8 +124,9 @@
     const selectedRow = tableData.find(row => row.id === selectedId);
     if (!selectedRow) {
       // проверка было ли найдено значение по id
-      sell_price.textContent = 'Sell: N/A';
-      buy_price.textContent = 'Buy: N/A';
+      sell_price.textContent = 'N/A';
+      buy_price.textContent = 'N/A';
+      return; // Прерываем выполнение функции, если строка не найдена
     }
     const instrumentName = selectedRow.instrument;  // Получаем название инструмента
 
@@ -133,9 +134,9 @@
     const sellRow = tableData.find(row => row.instrument === instrumentName && row.side === 'Sell');
     const buyRow = tableData.find(row => row.instrument === instrumentName && row.side === 'Buy');
 
-    // Обновляем элементы <span>
-    sell_price.textContent = sellRow ? `Sell: ${sellRow.price}` : 'Sell: N/A';
-    buy_price.textContent = buyRow ? `Buy: ${buyRow.price}` : 'Buy: N/A';
+    // Обновляем элементы <span> с проверкой на существование значения sellRow и buyRow
+    sell_price.textContent = sellRow ? `${sellRow.price}` : 'N/A';
+    buy_price.textContent = buyRow ? `${buyRow.price}` : 'N/A';
 }
 </script>
 
