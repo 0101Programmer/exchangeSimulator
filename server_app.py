@@ -64,10 +64,13 @@ async def exchange_interface(request: Request):
 @app.post("/receive_data")
 async def receive_data(request: Request):
     data = await request.json()
-    result = get_order_by_id(data["order_id"])
-    buy_side = get_order_by_side_and_instrument("Buy", result["instrument"]) if (
-        get_order_by_side_and_instrument("Buy", result["instrument"])) else None
-    sell_side = get_order_by_side_and_instrument("Sell", result["instrument"]) if (
-        get_order_by_side_and_instrument("Sell", result["instrument"])) else None
+    order_id = get_order_by_id(data["order_id"])
+    order_amount = float(data["order_amount"]) if data["order_amount"] != '' else 1
 
-    return JSONResponse(content={"buy_side_price": buy_side["price"], "sell_side_price": sell_side["price"], "instrument": result["instrument"]})
+    buy_side = get_order_by_side_and_instrument("Buy", order_id["instrument"]) if (
+        get_order_by_side_and_instrument("Buy", order_id["instrument"])) else None
+    sell_side = get_order_by_side_and_instrument("Sell", order_id["instrument"]) if (
+        get_order_by_side_and_instrument("Sell", order_id["instrument"])) else None
+
+    return JSONResponse(content={"buy_side_price": round(buy_side["price"] * order_amount, 5),
+                                 "sell_side_price": round(sell_side["price"] * order_amount, 5), })
