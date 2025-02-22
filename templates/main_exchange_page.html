@@ -39,12 +39,18 @@
   <tbody id="tableBody"></tbody>
 </table>
 
+<br>
+
 <form id="order-widget">
   <p>
-    <label for="instrument-select">Выберите инструмент:</label>
+    <label for="instrument-select"></label>
     <select name="instruments" id="instrument-select">
       <!-- Опции будут добавлены через JavaScript -->
     </select>
+  </p>
+  <p>
+    <label for="amount"></label>
+    <input name="order-amount" id="amount" type="number" min="1">
   </p>
 </form>
 
@@ -54,11 +60,13 @@
     const data = JSON.parse(event.data);
     const tbody = document.getElementById('tableBody');
     const select = document.getElementById('instrument-select');
+    const amount = document.getElementById('amount');
     // Очищаем таблицу и выпадающий список
     tbody.innerHTML = '';
     select.innerHTML = '';
+    amount.value = 1;
     // Заполняем таблицу
-    data.forEach(row => {
+    data.forEach((row, index)=> {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${row.id}</td>
@@ -75,6 +83,11 @@
       const option = document.createElement('option');
       option.value = row.id;
       option.textContent = row.instrument;
+      // Устанавливаем первый элемент как выбранный
+      if (index === 0) {
+        option.selected = true;
+      }
+
       select.appendChild(option);
     });
   };
