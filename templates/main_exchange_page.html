@@ -39,12 +39,25 @@
   <tbody id="tableBody"></tbody>
 </table>
 
+<form id="order-widget">
+  <p>
+    <label for="instrument-select">Выберите инструмент:</label>
+    <select name="instruments" id="instrument-select">
+      <!-- Опции будут добавлены через JavaScript -->
+    </select>
+  </p>
+</form>
+
 <script>
   const ws = new WebSocket("ws://localhost:8000/ws");
   ws.onmessage = function(event) {
     const data = JSON.parse(event.data);
     const tbody = document.getElementById('tableBody');
+    const select = document.getElementById('instrument-select');
+    // Очищаем таблицу и выпадающий список
     tbody.innerHTML = '';
+    select.innerHTML = '';
+    // Заполняем таблицу
     data.forEach(row => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -58,6 +71,11 @@
         <td>${row.instrument}</td>
       `;
       tbody.appendChild(tr);
+      // Добавляем инструмент в выпадающий список
+      const option = document.createElement('option');
+      option.value = row.id;
+      option.textContent = row.instrument;
+      select.appendChild(option);
     });
   };
 </script>
