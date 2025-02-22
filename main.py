@@ -1,8 +1,12 @@
+import json
+
 from fastapi import WebSocket
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, WebSocketDisconnect, Request, Response, Body
+
+from db_config.orders_crud import get_all_orders
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -49,14 +53,30 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()  # Принимаем соединение
     try:
         while True:
-            # Получаем сообщение от клиента
-            data = await websocket.receive_text()
-            # Отправляем обратно полученное сообщение с добавлением текста
-            await websocket.send_text(f"Сообщение от сервера: {data}")
+            # Отправляем данные из get_all_orders() сразу при подключении
+            orders = get_all_orders()
+            # Преобразуем datetime в ISO формат для JSON
+            orders_json = [
+                {
+                    "id": order["id"],
+                    "creation_time": order["creation_time"].isoformat(),
+                    "change_time": order["change_time"].isoformat(),
+                    "status": order["status"],
+                    "side": order["side"],
+                    "price": float(order["price"]),
+                    "amount": float(order["amount"]),
+                    "instrument": order["instrument"]
+                }
+                for order in orders
+            ]
+            await websocket.send_text(json.dumps(orders_json))
+            # Держим соединение открытым
+            while True:
+                await websocket.receive_text()
     except Exception as e:
         print(f"Ошибка: {e}")
     finally:
-        await websocket.close()  # Закрываем соединение при выходе
+        await websocket.close()
 
 if __name__ == "__main__":
     import uvicorn

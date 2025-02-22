@@ -23,24 +23,43 @@
 {% block header %}{{ header }}{% endblock %}
 
 {% block content %}
-<label for="messageInput">
-  <input type="text" id="messageInput" placeholder="Введите номер телефона">
-</label>
-<button onclick="sendMessage()">Отправить</button>
-<ul id="messages"></ul>
+<table id="orders_table">
+  <thead>
+  <tr>
+    <th>ID</th>
+    <th>Creation time</th>
+    <th>Change time</th>
+    <th>Status</th>
+    <th>Side</th>
+    <th>Price</th>
+    <th>Amount</th>
+    <th>Instrument</th>
+  </tr>
+  </thead>
+  <tbody id="tableBody"></tbody>
+</table>
+
 <script>
   const ws = new WebSocket("ws://localhost:8000/ws");
   ws.onmessage = function(event) {
-    const messages = document.getElementById('messages');
-    const message = document.createElement('li');
-    message.textContent = event.data;
-    messages.appendChild(message);
+    const data = JSON.parse(event.data);
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+    data.forEach(row => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${row.id}</td>
+        <td>${new Date(row.creation_time).toLocaleString()}</td>
+        <td>${new Date(row.change_time).toLocaleString()}</td>
+        <td>${row.status}</td>
+        <td>${row.side}</td>
+        <td>${row.price}</td>
+        <td>${row.amount}</td>
+        <td>${row.instrument}</td>
+      `;
+      tbody.appendChild(tr);
+    });
   };
-  function sendMessage() {
-    const input = document.getElementById("messageInput");
-    ws.send(input.value);
-    input.value = '';
-  }
 </script>
 
 {% endblock %}
