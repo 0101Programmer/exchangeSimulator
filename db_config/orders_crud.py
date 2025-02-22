@@ -11,15 +11,15 @@ amount_list = [10_000.00, 20_000.00, 30_000.00, 50_000.00, 60_000.00, 70_000.00,
                350_000.00, 500_000.00]
 instrument_list = ["CNH/RUB", "EUR/RUB", "EUR/USD", "USD/RUB", "TRY/RUB", "BYN/RUB"]
 
-def create_order():
+def create_order(side_idx, instrument_idx):
     # Вычисляем значения в Python
     creation_time = datetime.now()
     change_time = datetime.now()
     status = random.choice(status_list)
-    side = random.choice(side_list)
+    side = side_list[side_idx]
     price = random.uniform(3, 65)
     amount = random.choice(amount_list)
-    instrument = random.choice(instrument_list)
+    instrument = instrument_list[instrument_idx]
 
     # SQL-запрос с параметрами
     query = '''
@@ -43,9 +43,11 @@ def get_all_orders():
 
 
 if __name__ == '__main__':
-    # создать 10 заявок на бирже
-    # for i in range(10):
-    #     create_order()
+    # создание заявок в таблице
+
+    # for i, instrument in enumerate(instrument_list):
+    #     create_order(0, i)
+    #     create_order(1, i)
 
     # получить все заявки из таблицы
     print(get_all_orders())
