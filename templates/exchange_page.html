@@ -79,24 +79,26 @@
     </p>
 </form>
 
+<div id="updates"></div>
+
 <script>
     document.getElementById('order-widget').classList.add('hidden');
     document.getElementById('order-value-p').classList.add('hidden');
     document.getElementById('order-price').classList.add('hidden');
     document.getElementById('order-action').classList.add('hidden');
 
-    let socket;
-    let phone_number;
     function connectToExchange() {
-        phone_number = document.getElementById("phone_number").value;
-        if (phone_number) {
-            socket = new WebSocket(`ws://localhost:8000/ws/${phone_number}`);
-            socket.onmessage = function(event) {
-                document.getElementById('connection-form').classList.add('hidden');
-                document.getElementById('order-widget').classList.remove('hidden');
-            };
+        const phoneNumber = document.getElementById("phone_number").value;
+        const socket = new WebSocket(`ws://localhost:8000/ws/${phoneNumber}`);
+        socket.onmessage = function(event) {
+            document.getElementById('connection-form').classList.add('hidden');
+            document.getElementById('order-widget').classList.remove('hidden');
+            const data = JSON.parse(event.data);
+            const updatesDiv = document.getElementById('updates');
+            updatesDiv.innerHTML = `<p>Message: ${data.message}</p> <p>Phone Number: ${data.phone_number}</p>`;
         }
     }
+
     document.getElementById("instrument-select").addEventListener("change", instrumentChoice);
 
 
@@ -137,42 +139,6 @@
     }
     document.getElementById('order_value').addEventListener('input', updateOrderWidget);
 
-    // function instrumentChoice() {
-    //     const order_id = document.getElementById('instrument-select').value;
-    //
-    //     document.getElementById('order-value-p').classList.remove('hidden');
-    //     document.getElementById('order-price').classList.remove('hidden');
-    //     document.getElementById('order-action').classList.remove('hidden');
-    //     document.getElementById('order_value').value = 1;
-    //     const order_amount = document.getElementById('order_value').value;
-    //
-    //     $.ajax({
-    //         url: '/receive_data',
-    //         type: 'POST',
-    //         contentType: 'application/json',
-    //         data: JSON.stringify({ 'order_id': order_id, "order_amount": order_amount}),
-    //         success: function(response) {
-    //                 document.getElementById('sell_price').innerHTML = response.sell_side_price;
-    //                 document.getElementById('buy_price').innerHTML = response.buy_side_price;
-    //             },
-    //         error: function(error) {
-    //                 console.log(error);
-    //             }
-    //         });
-    // }
-
-
-
-
-    // const order_val = document.getElementById('order_value');
-    // const order_sell_price = document.getElementById('sell_price');
-    // const order_buy_price = document.getElementById('buy_price');
-    //
-    // order_val.addEventListener('input', function() {
-    //     const orderValue = parseFloat(order_val.value);
-    //     const sellPrice = parseFloat(order_sell_price.textContent);
-    //     order_sell_price.textContent = order_val.value * 10;
-    //     });
 </script>
 
 {% endblock %}

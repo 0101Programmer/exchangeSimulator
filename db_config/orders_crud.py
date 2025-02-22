@@ -57,6 +57,22 @@ def get_order_by_side_and_instrument(order_side, order_instrument):
             order = curs.fetchone()
             return order
 
+def update_all_orders():
+    with get_connection() as conn:
+        with conn.cursor() as curs:
+            curs.execute('TRUNCATE TABLE orders RESTART IDENTITY')
+    for i, instrument in enumerate(instrument_list):
+        create_order(0, i)
+        create_order(1, i)
+    return {"message": "success"}
+
+
+def delete_all_orders():
+    with get_connection() as conn:
+        with conn.cursor() as curs:
+            curs.execute('TRUNCATE TABLE orders RESTART IDENTITY')
+    return {"message": "success"}
+
 
 if __name__ == '__main__':
     # создание заявок в таблице
@@ -67,3 +83,10 @@ if __name__ == '__main__':
 
     # получить все заявки из таблицы
     print(get_all_orders())
+
+    # обновить все заявки из таблицы
+    update_all_orders()
+
+    # удалить все заявки из таблицы
+
+    # delete_all_orders()
