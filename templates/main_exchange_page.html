@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block navbar %}
+<nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Exchange Simulator</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mynavbar">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link active" href="#">Биржа</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+{% endblock %}
+
+{% block header %}{{ header }}{% endblock %}
+
+{% block content %}
+<label for="messageInput">
+  <input type="text" id="messageInput" placeholder="Введите номер телефона">
+</label>
+<button onclick="sendMessage()">Отправить</button>
+<ul id="messages"></ul>
+<script>
+  const ws = new WebSocket("ws://localhost:8000/ws");
+  ws.onmessage = function(event) {
+    const messages = document.getElementById('messages');
+    const message = document.createElement('li');
+    message.textContent = event.data;
+    messages.appendChild(message);
+  };
+  function sendMessage() {
+    const input = document.getElementById("messageInput");
+    ws.send(input.value);
+    input.value = '';
+  }
+</script>
+
+{% endblock %}
