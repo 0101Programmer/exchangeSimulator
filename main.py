@@ -10,10 +10,6 @@ from fastapi import FastAPI, WebSocketDisconnect, Request, Response, Body
 
 from db_config.orders_crud import get_all_orders, update_all_orders
 
-# app = FastAPI()
-# templates = Jinja2Templates(directory="templates")
-# app.mount("/static", StaticFiles(directory="static"), name="static")
-
 # Глобальная переменная для хранения и периодического обновления табличных данных
 global_orders = []
 
@@ -105,42 +101,6 @@ async def websocket_endpoint(websocket: WebSocket):
     finally:
         active_connections.remove(websocket)
         await websocket.close()
-
-
-# @app.websocket("/ws")
-# async def websocket_endpoint(websocket: WebSocket):
-#     await websocket.accept()  # Принимаем соединение
-#     active_connections.append(websocket)
-#     try:
-#         while True:
-#             # Отправляем данные из get_all_orders() сразу при подключении
-#             orders = get_all_orders()
-#             # Преобразуем datetime в ISO формат для JSON
-#             orders_json = [
-#                 {
-#                     "id": order["id"],
-#                     "creation_time": order["creation_time"].isoformat(),
-#                     "change_time": order["change_time"].isoformat(),
-#                     "status": order["status"],
-#                     "side": order["side"],
-#                     "price": float(order["price"]),
-#                     "amount": float(order["amount"]),
-#                     "instrument": order["instrument"]
-#                 }
-#                 for order in orders
-#             ]
-#             await websocket.send_text(json.dumps(orders_json))
-#             # Держим соединение открытым
-#             while True:
-#                 await websocket.receive_text()
-#     except Exception as e:
-#         print(f"Ошибка: {e}")
-#     finally:
-#         await websocket.close()
-
-# if __name__ == "__main__":
-#     import uvicorn
-#     uvicorn.run(app, host="localhost", port=8000)
 
 
 # Запуск сервера

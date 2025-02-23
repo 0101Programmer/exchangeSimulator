@@ -139,8 +139,8 @@
     const buyRow = tableData.find(row => row.instrument === instrumentName && row.side === 'Buy');
 
     // Обновляем элементы <span> с проверкой на существование значения sellRow и buyRow
-    sell_price.textContent = sellRow ? `${sellRow.price}` : 'N/A';
-    buy_price.textContent = buyRow ? `${buyRow.price}` : 'N/A';
+    sell_price.textContent = sellRow ? `${sellRow.price.toFixed(3)}` : 'N/A';
+    buy_price.textContent = buyRow ? `${buyRow.price.toFixed(3)}` : 'N/A';
 }
 </script>
 
