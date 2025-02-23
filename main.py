@@ -2,12 +2,14 @@ import asyncio
 import json
 from contextlib import asynccontextmanager
 
-from fastapi import WebSocket
+from fastapi import WebSocket, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, WebSocketDisconnect, Request, Response, Body
 
+from db_config.messages_crud import create_message
+from db_config.models import Message
 from db_config.orders_crud import get_all_orders, update_all_orders
 
 # Глобальная переменная для хранения и периодического обновления табличных данных
@@ -101,6 +103,18 @@ async def websocket_endpoint(websocket: WebSocket):
     finally:
         active_connections.remove(websocket)
         await websocket.close()
+
+
+
+# Эндпоинт для приема сообщений от сервера и сохранения их в БД
+@app.post("/api/v1/receive_message/")
+async def receive_message(message: Message):
+    try:
+        create_message(message.msg_field, message.msg_type, message.msg_comment)
+        return {"status": "success"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка при сохранении сообщения: {str(e)}")
 
 
 # Запуск сервера

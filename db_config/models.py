@@ -1,3 +1,5 @@
+from pydantic import BaseModel
+
 from db_config.db_connection import get_connection
 
 with get_connection() as conn:
@@ -18,3 +20,10 @@ with get_connection() as conn:
                 MESSAGE_TYPE TEXT NOT NULL,
                 MESSAGE_COMMENT TEXT NOT NULL);''')
         conn.commit()
+
+
+# Модель для сообщений от сервера
+class Message(BaseModel):
+    msg_field: str
+    msg_type: str
+    msg_comment: str
