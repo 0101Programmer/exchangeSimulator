@@ -118,8 +118,16 @@
       const selectedId = parseInt(this.value);  // Получаем выбранный id
       updatePrices(selectedId);  // Обновляем цены
     });
+
+    // Добавляем обработчик события input для amount
+    amount.addEventListener('input', function() {
+      const currentAmount = Number(amount.value) || 1;  // Получаем текущее количество и, если оно некорректно - ставим 1
+      const selectedId = parseInt(document.getElementById('instrument-select').value); // Получаем id инструмента
+      updateTotalPrices(currentAmount, selectedId);  // Вызываем обновление цен
+    });
   };
-  // Функция для обновления цен
+
+  // Функция для обновления цен по выбранному инструменту
   function updatePrices(selectedId) {
     const sell_price = document.getElementById('sell-price');
     const buy_price = document.getElementById('buy-price');
@@ -141,7 +149,42 @@
     // Обновляем элементы <span> с проверкой на существование значения sellRow и buyRow
     sell_price.textContent = sellRow ? `${sellRow.price.toFixed(3)}` : 'N/A';
     buy_price.textContent = buyRow ? `${buyRow.price.toFixed(3)}` : 'N/A';
-}
+  }
+
+  // Функция для обновления цен с учетом торгового объёма
+  function updateTotalPrices(currentAmount, selectedId) {
+    const sell_price = document.getElementById('sell-price');
+    const buy_price = document.getElementById('buy-price');
+
+    // Находим строку данных по selectedId, чтобы получить название инструмента
+    const selectedRow = tableData.find(row => row.id === selectedId);
+    if (!selectedRow) {
+      // Проверка, было ли найдено значение по id
+      sell_price.textContent = 'N/A';
+      buy_price.textContent = 'N/A';
+      return;  // Прерываем выполнение функции, если строка не найдена
+    }
+    const instrumentName = selectedRow.instrument;  // Получаем название инструмента
+
+    // Находим цены для выбранного инструмента
+    const sellRow = tableData.find(row => row.instrument === instrumentName && row.side === 'Sell');
+    const buyRow = tableData.find(row => row.instrument === instrumentName && row.side === 'Buy');
+
+    // Обновляем элементы <span> с учетом торгового объёма
+    if (sellRow) {
+      const totalSellPrice = (sellRow.price * currentAmount).toFixed(3);
+      sell_price.textContent = `${totalSellPrice}`;
+    } else {
+      sell_price.textContent = 'N/A';
+    }
+
+    if (buyRow) {
+      const totalBuyPrice = (buyRow.price * currentAmount).toFixed(3);
+      buy_price.textContent = `${totalBuyPrice}`;
+    } else {
+      buy_price.textContent = 'N/A';
+    }
+  }
 </script>
 
 {% endblock %}
