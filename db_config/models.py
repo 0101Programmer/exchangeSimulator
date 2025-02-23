@@ -12,3 +12,9 @@ with get_connection() as conn:
         AMOUNT real NOT NULL,
         INSTRUMENT TEXT NOT NULL);''')
         conn.commit()
+        curs.execute('''CREATE TABLE IF NOT EXISTS messages
+                (ID serial PRIMARY KEY NOT NULL,
+                MESSAGE_FIELD TEXT NOT NULL,\
+                MESSAGE_TYPE TEXT NOT NULL,
+                MESSAGE_COMMENT TEXT NOT NULL);''')
+        conn.commit()
