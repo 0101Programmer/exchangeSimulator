@@ -1,26 +1,24 @@
 import asyncio
 import json
 from contextlib import asynccontextmanager
-import requests
-import json
+import httpx
+from fastapi import FastAPI, Request
 from fastapi import WebSocket, HTTPException
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from fastapi import FastAPI, WebSocketDisconnect, Request, Response, Body
-
+from fastapi.templating import Jinja2Templates
 from db_config.messages_crud import create_message
 from db_config.models import Message
-from db_config.orders_crud import get_all_orders, update_all_orders
+from db_config.orders_crud import update_all_orders
 
 # Глобальная переменная для хранения и периодического обновления табличных данных
 global_orders = []
 
+# Глобальная переменная для хранения времени периодического обновления табличных данных
+refresh_sleep_time = 45
+
 # подключённые клиенты
 active_connections = []
 
-
-import httpx
 
 async def send_message(msg_field, msg_type, msg_comment, msg_name):
     url = "http://127.0.0.1:8000/api/v1/receive_message/"
@@ -75,8 +73,8 @@ async def periodic_update():
         for connection in active_connections:
             await connection.send_text(json.dumps(orders_json))
 
-        # Ждем 45 секунд перед следующей отправкой
-        await asyncio.sleep(45)
+        # Ждем перед следующей отправкой
+        await asyncio.sleep(refresh_sleep_time)
 
 
 # Lifespan event handler
@@ -136,7 +134,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
 
 
-# Эндпоинт для приема сообщений от сервера и сохранения их в БД
+# API эндпоинт для приема сообщений от сервера и сохранения их в БД
 @app.post("/api/v1/receive_message/")
 async def receive_message(message: Message):
     try:
