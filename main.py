@@ -44,8 +44,8 @@ async def periodic_update():
         for connection in active_connections:
             await connection.send_text(json.dumps(orders_json))
 
-        # Ждем 25 секунд перед следующей отправкой
-        await asyncio.sleep(25)
+        # Ждем 45 секунд перед следующей отправкой
+        await asyncio.sleep(45)
 
 
 # Lifespan event handler

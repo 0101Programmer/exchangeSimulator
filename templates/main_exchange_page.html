@@ -54,17 +54,65 @@
   </p>
   <p>
     <label></label>
-    <span id="sell-price"></span> <span id="buy-price"></span>
+    <span id="sell-price" style="color: red;"></span> <span id="buy-price" style="color: green;"></span>
   </p>
   <p>
     <label></label>
-    <button id="sell-button">Sell</button> <button id="buy-button">Buy</button>
+    <button id="sell-button" type="button" style="background-color: red;">SELL</button>
+    <button id="buy-button" type="button" style="background-color: green;">BUY</button>
   </p>
 </form>
+
+<br>
+
+<div>
+  <p>Текущие заявки:</p>
+  <div id="orders-list"></div>
+</div>
 
 <script>
   const ws = new WebSocket("ws://localhost:8000/ws");
   let tableData = [];  // Сохраняем данные таблицы для дальнейшего использования
+  let orders = [];     // Массив для хранения заявок
+
+  // Функция для добавления заявки
+  function addOrder(side, instrument, amount, price) {
+      const order = {
+          id: self.crypto.randomUUID(), // Уникальный ID заявки
+          side: side,
+          instrument: instrument,
+          amount: amount,
+          price: price
+      };
+      orders.push(order); // Добавляем заявку в массив
+      renderOrders();     // Обновляем список заявок
+      console.log(order)
+  }
+
+  // Функция для удаления заявки
+  function removeOrder(orderId) {
+      orders = orders.filter(order => order.id !== orderId); // Удаляем заявку из массива
+      renderOrders(); // Обновляем список заявок
+  }
+
+  // Функция для отображения заявок
+  function renderOrders() {
+      const ordersList = document.getElementById('orders-list');
+      ordersList.innerHTML = ''; // Очищаем список перед обновлением
+
+      orders.forEach(order => {
+          const orderItem = document.createElement('div');
+          orderItem.className = 'order-item';
+          orderItem.innerHTML = `
+              <div>
+                  <strong>${order.side === 'Buy' ? 'Покупка' : 'Продажа'}</strong>
+                  ${order.instrument} - ${order.amount} шт. по ${order.price.toFixed(3)}
+              </div>
+              <button onclick="removeOrder('${order.id}')">Отменить</button>
+          `;
+          ordersList.appendChild(orderItem);
+      });
+  }
 
   ws.onmessage = function(event) {
     const data = JSON.parse(event.data);
@@ -83,7 +131,7 @@
     buy_price.innerHTML = '';
 
     // Заполняем таблицу
-    data.forEach((row, index)=> {
+    data.forEach((row, index) => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${row.id}</td>
@@ -113,19 +161,48 @@
     });
 
     // Добавляем обработчик события change для select
-    select.addEventListener('change', function() {
+    select.addEventListener('change', function () {
       // this ссылается на элемент <select>
       const selectedId = parseInt(this.value);  // Получаем выбранный id
       updatePrices(selectedId);  // Обновляем цены
     });
 
     // Добавляем обработчик события input для amount
-    amount.addEventListener('input', function() {
+    amount.addEventListener('input', function () {
       const currentAmount = Number(amount.value) || 1;  // Получаем текущее количество и, если оно некорректно - ставим 1
       const selectedId = parseInt(document.getElementById('instrument-select').value); // Получаем id инструмента
       updateTotalPrices(currentAmount, selectedId);  // Вызываем обновление цен
     });
+
   };
+
+  // Обработчики кнопок "Buy" и "Sell"
+  document.getElementById('buy-button').addEventListener('click', function() {
+      const selectedId = parseInt(document.getElementById('instrument-select').value);
+      const selectedRow = tableData.find(row => row.id === selectedId);
+      const amount = Number(document.getElementById('amount').value) || 1;
+      const price = parseFloat(document.getElementById('buy-price').textContent);
+
+      if (selectedRow && price) {
+          addOrder('Buy', selectedRow.instrument, amount, price);
+      } else {
+          alert('Ошибка: не удалось получить данные для заявки.');
+      }
+  });
+
+  document.getElementById('sell-button').addEventListener('click', function() {
+      const selectedId = parseInt(document.getElementById('instrument-select').value);
+      const selectedRow = tableData.find(row => row.id === selectedId);
+      const amount = Number(document.getElementById('amount').value) || 1;
+      const price = parseFloat(document.getElementById('sell-price').textContent);
+
+      if (selectedRow && price) {
+          addOrder('Sell', selectedRow.instrument, amount, price);
+      } else {
+          alert('Ошибка: не удалось получить данные для заявки.');
+      }
+  });
+
 
   // Функция для обновления цен по выбранному инструменту
   function updatePrices(selectedId) {
