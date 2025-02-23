@@ -82,41 +82,48 @@
           side: side,
           instrument: instrument,
           amount: amount,
-          price: price
+          price: price,
+          timerId: null // Идентификатор таймера
       };
       orders.push(order); // Добавляем заявку в массив
       renderOrders();     // Обновляем список заявок
 
       // Запускаем таймер для проверки статуса заявки через 10 секунд
-      checkOrderStatus(order.id);
-  }
 
-  // Функция для проверки статуса заявки
-  function checkOrderStatus(orderId) {
-    setTimeout(() => {
+      order.timerId = setTimeout(() => {
       // Симуляция ответа от сервера (рандомный true/false)
       const isExecuted = Math.random() > 0.5; // 50% шанс, что заявка исполнена
 
       // Показываем alert с результатом
       if (isExecuted) {
-        alert(`Заявка ${orderId} исполнена.`);
+        alert(`Заявка ${order.id} исполнена.`);
       } else {
-        alert(`Заявка ${orderId} не исполнена.`);
+        alert(`Заявка ${order.id} не исполнена.`);
       }
 
       // Обновляем статус заявки в массиве orders
-      const order = orders.find(order => order.id === orderId);
-      if (order) {
-        order.status = isExecuted ? 'Исполнена' : 'Не исполнена';
-        renderOrders(); // Обновляем список заявок
-      }
-      }, 10000); // 10 секунд
+      order.status = isExecuted ? 'Исполнена' : 'Не исполнена';
+      renderOrders(); // Обновляем список заявок
+  }, 10000); // 10 секунд
+
   }
+
 
   // Функция для удаления заявки
   function removeOrder(orderId) {
-      orders = orders.filter(order => order.id !== orderId); // Удаляем заявку из массива
+    const orderIndex = orders.findIndex(order => order.id === orderId);
+    if (orderIndex !== -1) {
+      const order = orders[orderIndex];
+
+      // Отменяем таймер, если он существует
+      if (order.timerId) {
+        clearTimeout(order.timerId);
+      }
+
+      // Удаляем заявку из массива
+      orders.splice(orderIndex, 1);
       renderOrders(); // Обновляем список заявок
+      }
   }
 
   // Функция для отображения заявок
