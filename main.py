@@ -1,7 +1,8 @@
 import asyncio
 import json
 from contextlib import asynccontextmanager
-
+import requests
+import json
 from fastapi import WebSocket, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -19,6 +20,32 @@ global_orders = []
 active_connections = []
 
 
+import httpx
+
+async def send_message(msg_field, msg_type, msg_comment, msg_name):
+    url = "http://127.0.0.1:8000/api/v1/receive_message/"
+    data = {
+        "msg_field": str(msg_field),
+        "msg_type": str(msg_type),
+        "msg_comment": str(msg_comment),
+        "msg_name": str(msg_name)
+    }
+
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(url, json=data, headers=headers, timeout=10)
+            if response.status_code == 200:
+                print("Сообщение успешно отправлено.")
+            else:
+                print(f"Ошибка при отправке сообщения: {response.status_code}, {response.text}")
+        except Exception as e:
+            print(f"Ошибка при отправке POST-запроса: {str(e)}")
+
 
 # Функция для периодического обновления данных в таблице заявок
 async def periodic_update():
@@ -26,6 +53,8 @@ async def periodic_update():
     while True:
         # Обновляем данные с помощью update_all_orders()
         global_orders = update_all_orders()
+        # отправка сообщения MarketDataUpdate
+        await send_message("success", "string", "Изменение котировок", "MarketDataUpdate")
 
         # Преобразуем datetime в ISO формат для JSON
         orders_json = [
@@ -99,6 +128,7 @@ async def websocket_endpoint(websocket: WebSocket):
         while True:
             await websocket.receive_text()  # Ожидаем сообщения от клиента
     except Exception as e:
+        await send_message("error", "string", f"Ошибка: {e}", "ErrorInfo")
         print(f"Ошибка: {e}")
     finally:
         active_connections.remove(websocket)
@@ -110,7 +140,7 @@ async def websocket_endpoint(websocket: WebSocket):
 @app.post("/api/v1/receive_message/")
 async def receive_message(message: Message):
     try:
-        create_message(message.msg_field, message.msg_type, message.msg_comment)
+        create_message(message.msg_field, message.msg_type, message.msg_comment, message.msg_name)
         return {"status": "success"}
 
     except Exception as e:

@@ -18,7 +18,8 @@ with get_connection() as conn:
                 (ID serial PRIMARY KEY NOT NULL,
                 MESSAGE_FIELD TEXT NOT NULL,\
                 MESSAGE_TYPE TEXT NOT NULL,
-                MESSAGE_COMMENT TEXT NOT NULL);''')
+                MESSAGE_COMMENT TEXT NOT NULL,
+                MESSAGE_NAME TEXT NOT NULL);''')
         conn.commit()
 
 
@@ -27,3 +28,4 @@ class Message(BaseModel):
     msg_field: str
     msg_type: str
     msg_comment: str
+    msg_name: str

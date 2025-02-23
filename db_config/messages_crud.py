@@ -6,14 +6,14 @@ import psycopg2.extras
 from db_config.db_connection import get_connection
 
 
-def create_message(msg_field, msg_type, msg_comment):
+def create_message(msg_field, msg_type, msg_comment, msg_name):
     with get_connection() as conn:
         with conn.cursor() as curs:
 
             curs.execute('''
-                INSERT INTO messages (message_field, message_type, message_comment) 
-                VALUES (%s, %s, %s)
-            ''', (msg_field, msg_type, msg_comment))
+                INSERT INTO messages (message_field, message_type, message_comment, message_name) 
+                VALUES (%s, %s, %s, %s)
+            ''', (msg_field, msg_type, msg_comment, msg_name))
             conn.commit()
 
 def get_all_messages():

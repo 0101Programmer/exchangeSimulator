@@ -76,15 +76,18 @@
   let orders = [];     // Массив для хранения заявок
 
   // Функция для добавления заявки
-  function addOrder(side, instrument, amount, price) {
+  function addOrder(side, instrument, row_id, amount, price) {
       const order = {
           id: self.crypto.randomUUID(), // Уникальный ID заявки
           side: side,
           instrument: instrument,
+          row_id: row_id,
           amount: amount,
           price: price,
           timerId: null // Идентификатор таймера, изначально таймера нет
       };
+      sendMessage(order.id, "string", "Идентификатор успешной подписки", "SuccessInfo"); // SuccessInfo
+      sendMessage(order.id, "string", "Идентификатор подписки, которая была размещена", "PlaceOrder"); // PlaceOrder
       orders.push(order); // Добавляем заявку в массив
       renderOrders();     // Обновляем список заявок
 
@@ -97,8 +100,10 @@
       // Показываем alert с результатом
       if (isExecuted) {
         alert(`Заявка ${order.id} исполнена.`);
+        sendMessage(order.id, "string", "Идентификатор подписки, которая была исполнена", "ExecutionReport"); // ExecutionReport
       } else {
         alert(`Заявка ${order.id} не исполнена.`);
+        sendMessage(order.id, "string", "Идентификатор подписки, которая не была исполнена", "ExecutionReport"); // ExecutionReport
       }
 
       // Обновляем статус заявки в массиве orders
@@ -123,6 +128,8 @@
       // Удаляем заявку из массива
       orders.splice(orderIndex, 1);
       renderOrders(); // Обновляем список заявок
+      sendMessage(orderId, "string", "Идентификатор подписки, которая была отменена", "CancelOrder"); // CancelOrder
+      sendMessage(order.row_id, "integer", "Идентификатор инструмента, на котировки которого отменена подписка", "UnsubscribeMarketData"); // UnsubscribeMarketData
       }
   }
 
@@ -216,9 +223,11 @@
       const price = parseFloat(document.getElementById('buy-price').textContent);
 
       if (selectedRow && price) {
-          addOrder('Buy', selectedRow.instrument, amount, price);
+          addOrder('Buy', selectedRow.instrument, selectedId, amount, price);
+          sendMessage(selectedId, "integer", "Идентификатор инструмента, на котировки которого запрошена подписка", "SubscribeMarketData"); // SubscribeMarketData
       } else {
           alert('Ошибка: не удалось получить данные для заявки.');
+          sendMessage("error", "string", "Не удалось получить данные для заявки", "ErrorInfo"); // ErrorInfo
       }
   });
 
@@ -229,9 +238,11 @@
       const price = parseFloat(document.getElementById('sell-price').textContent);
 
       if (selectedRow && price) {
-          addOrder('Sell', selectedRow.instrument, amount, price);
+          addOrder('Sell', selectedRow.instrument, selectedId, amount, price);
+          sendMessage(selectedId, "integer", "Идентификатор инструмента, на котировки которого запрошена подписка", "SubscribeMarketData"); // SubscribeMarketData
       } else {
           alert('Ошибка: не удалось получить данные для заявки.');
+          sendMessage("error", "string", "Не удалось получить данные для заявки", "ErrorInfo"); // ErrorInfo
       }
   });
 
@@ -285,6 +296,7 @@
       sell_price.textContent = `${totalSellPrice}`;
     } else {
       sell_price.textContent = 'N/A';
+      sendMessage("error", "string", "Не удалось найти цену продажи для выбранного инструмента", "ErrorInfo"); // ErrorInfo
     }
 
     if (buyRow) {
@@ -292,6 +304,42 @@
       buy_price.textContent = `${totalBuyPrice}`;
     } else {
       buy_price.textContent = 'N/A';
+      sendMessage("error", "string", "Не удалось найти цену покупки для выбранного инструмента", "ErrorInfo"); // ErrorInfo
+    }
+  }
+
+  // Функция для отправки сообщения от сервера
+  async function sendMessage(msgField, msgType, msgComment, msgName) {
+    const url = "http://localhost:8000/api/v1/receive_message/";
+    // Создаем объект данных
+    const data = {
+      msg_field: String(msgField),
+      msg_type: String(msgType),
+      msg_comment: String(msgComment),
+      msg_name: String(msgName)
+    };
+
+    try {
+      // Отправляем POST-запрос
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data) // Преобразуем данные в JSON
+        });
+
+        // Проверяем статус ответа
+        if (!response.ok) {
+          console.error(`Ошибка сервера: ${response.status}`);
+          return;
+        }
+
+        // Получаем ответ от сервера
+        const result = await response.json();
+        console.log("Ответ сервера:", result);
+    } catch (error) {
+      console.error("Ошибка при отправке сообщения:", error.message);
     }
   }
 </script>
