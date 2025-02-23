@@ -64,7 +64,7 @@ def update_all_orders():
     for i, instrument in enumerate(instrument_list):
         create_order(0, i)
         create_order(1, i)
-    return {"message": "success"}
+    return get_all_orders()
 
 
 def delete_all_orders():
@@ -85,7 +85,7 @@ if __name__ == '__main__':
     print(get_all_orders())
 
     # обновить все заявки из таблицы
-    update_all_orders()
+    print(update_all_orders())
 
     # удалить все заявки из таблицы
 
