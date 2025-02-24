@@ -28,7 +28,6 @@ def create_order(side_idx, instrument_idx):
         '''
     with get_connection() as conn:
         with conn.cursor() as curs:
-
             # Передаем параметры в запрос
             curs.execute(query, (creation_time, change_time, status, side, price, amount, instrument))
             conn.commit()
