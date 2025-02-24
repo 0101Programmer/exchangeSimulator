@@ -8,11 +8,11 @@ from db_config.orders_crud import create_order, status_list, amount_list, get_al
 
 class TestOrdersCRUD(unittest.TestCase):
 
-    @patch('db_config.orders_crud.get_connection')
+    @patch('db_config.orders_crud.get_connection') # Мокируем get_connection в orders_crud
     def test_create_order(self, mock_get_connection):
         """
         Тестирование функции create_order.
-        Проверяет, что функция корректно выполняет SQL-запрос и сохраняет их в БД.
+        Проверяет, что функция корректно выполняет SQL-запрос и сохраняет запись в БД.
         """
         # Мокируем соединение с базой данных и курсор
         mock_conn = MagicMock()
