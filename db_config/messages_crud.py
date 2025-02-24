@@ -40,4 +40,4 @@ def delete_all_messages():
     return {"message": "success"}
 
 if __name__ == '__main__':
-    print(get_all_messages())
+    print(delete_all_messages())
