@@ -100,7 +100,7 @@ class TestOrdersCRUD(unittest.TestCase):
     @patch('db_config.orders_crud.get_connection')
     def test_get_order_by_id(self, mock_get_connection):
         """
-        Тестирование функции get_order_by_id для существующего order_id.
+        Тестирование функции get_order_by_id для запроса заявки по order_id.
         """
         # Создаем мок для соединения
         mock_conn = MagicMock()

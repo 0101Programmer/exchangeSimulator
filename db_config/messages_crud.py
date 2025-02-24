@@ -24,11 +24,11 @@ def get_all_messages():
             messages = curs.fetchall()
             return messages
 
-def get_order_by_id(order_id):
+def get_message_by_id(message_id):
     with get_connection() as conn:
         # запрос записи по id
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as curs:
-            curs.execute('SELECT * FROM messages WHERE id=%s', (order_id, ))
+            curs.execute('SELECT * FROM messages WHERE id=%s', (message_id, ))
             message = curs.fetchone()
             return message
 
@@ -40,4 +40,4 @@ def delete_all_messages():
     return {"message": "success"}
 
 if __name__ == '__main__':
-    delete_all_messages()
+    print(get_all_messages())
