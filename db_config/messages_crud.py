@@ -1,6 +1,3 @@
-import random
-from datetime import datetime
-
 import psycopg2.extras
 
 from db_config.db_connection import get_connection

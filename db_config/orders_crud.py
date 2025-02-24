@@ -74,6 +74,7 @@ def delete_all_orders():
 
 
 if __name__ == '__main__':
+
     # создание заявок в таблице
 
     # for i, instrument in enumerate(instrument_list):
@@ -84,7 +85,7 @@ if __name__ == '__main__':
     print(get_all_orders())
 
     # обновить все заявки из таблицы
-    print(update_all_orders())
+    # print(update_all_orders())
 
     # удалить все заявки из таблицы
 
