@@ -68,7 +68,7 @@ stack-data==0.6.3
 starlette==0.45.3
 terminaltables==3.1.10
 tinycss2==1.4.0
-tornado==6.4.2
+tornado==6.5.7
 traitlets==5.14.3
 typing_extensions==4.12.2
 urllib3==2.3.0
